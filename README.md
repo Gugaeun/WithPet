@@ -74,6 +74,29 @@ phpMyAdmin으로 관리한 MySQL 테이블 4개로 구성했습니다.
 - **검색 · 필터:** 앱이 이름, 지역, 카테고리, 몸무게, 맹견 여부 등 필터 값을 보내면 서버가 `Place` 테이블에서 조건에 맞는 장소를 찾아 JSON 배열로 응답합니다.
 - **맞춤 검색:** 앱이 선택한 반려견의 ID만 보내면 서버가 `Dog` 테이블의 몸무게·맹견 여부와 `Place` 테이블의 제한 조건을 비교해 입장 가능한 장소를 찾습니다.
 
+### 핵심 로직 (보고서 발췌, 서버 주소·접속 정보는 제외)
+
+**① 맞춤 검색 SQL (`Custom.php`)** — 선택한 반려견의 몸무게·맹견 여부로 입장 가능한 장소를 찾습니다.
+
+```sql
+SELECT Place_id, P_name, P_address, P_image
+FROM Place, Dog
+WHERE (Place.P_kg NOT BETWEEN 0 AND Dog.D_kg
+       OR Place.P_kg IS NULL AND Place.P_sav <= Dog.D_sav)
+  AND Dog.Dog_id = ?
+```
+
+- 장소의 제한 몸무게가 내 반려견 몸무게보다 크면 입장 가능한 장소로 봅니다.
+- 몸무게 제한이 없는 장소(`NULL`)는 맹견 조건을 비교해 걸러냅니다.
+
+**② 앱과 서버의 통신 (Volley)** — 입력값을 요청 객체에 담아 서버로 보내고, JSON 응답을 받아 화면에 반영합니다.
+
+```java
+LoginRequest loginRequest = new LoginRequest(ID, PW, responseListener);
+RequestQueue queue = Volley.newRequestQueue(LoginActivity.this);
+queue.add(loginRequest);   // 서버의 PHP가 DB를 조회하고 JSON으로 응답
+```
+
 ## 📱 실행 화면
 
 ### UI 설계 시안
@@ -105,6 +128,7 @@ phpMyAdmin으로 관리한 MySQL 테이블 4개로 구성했습니다.
 
 - 핵심인 입장 조건 검색은 구현을 마쳤지만, **앱 디자인과 UI, 데이터, 보안, 일부 기능**은 부족했습니다.
 - 홈 화면과 찜 화면에서 찜 등록 시 **데이터 무결성은 확인하지 못했습니다.**
+- 이름·조건으로 조회하는 SQL의 조건 묶음과 입력값 처리 방식, 비밀번호 저장 방식은 보안과 정확도 면에서 개선이 필요합니다.
 - 한글이 들어간 아이디는 인코딩 문제로 로그인이 되지 않는 경우가 있었습니다.
 
 ## 💡 배운 점
