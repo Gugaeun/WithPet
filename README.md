@@ -30,10 +30,10 @@
 
 ```mermaid
 flowchart LR
-    A["안드로이드 앱<br/>(Java, Android Studio)"] -- "Volley (HTTP 요청)" --> B["PHP 서버<br/>(닷홈 호스팅)"]
-    B -- "SQL 질의" --> C[("MySQL")]
-    C -- "결과" --> B
-    B -- "JSON" --> A
+    A["안드로이드 앱<br/>Java · Android Studio<br/>(Volley로 요청)"] -->|"요청"| B["PHP 서버<br/>닷홈 호스팅"]
+    B -->|"SQL"| C[("MySQL")]
+    C -->|"결과"| B
+    B -->|"JSON"| A
 ```
 
 앱의 모든 기능은 서버와의 통신으로 동작합니다. 앱이 입력값을 PHP로 보내면 PHP가 MySQL에서 조회·저장한 뒤 결과를 JSON으로 돌려주고, 앱은 이를 화면에 표시합니다.
